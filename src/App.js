@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { db } from "./firebase-config"
-import { collection, getDocs, addDoc } from "firebase/firestore"
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore"
 import "./App.css";
 import ReadOnlyRow from "./Components/ReadOnlyRow";
 import EditableRow from "./Components/EditableRow";
+import { Pagination } from 'antd';
 import { ImArrowRight } from "react-icons/im";
 
 export default function Example() {
@@ -14,9 +15,7 @@ export default function Example() {
 
     const getClients = async () =>{
       const data = await getDocs(clientsCollectionRef)
-      console.log(data)
       setLinha(data.docs.map((doc)=>({ ...doc.data(), id: doc.id })))
-      console.log(linha)
     }
     
     getClients()
@@ -130,7 +129,6 @@ export default function Example() {
     setLinha([
       ...linha,
       {
-        id: count,
         nome: nome,
         idade: idade,
         civil: civil,
@@ -148,18 +146,23 @@ export default function Example() {
     setEstado("")
   }
 
-  const HandleDelete = (event, id) => {
+  const HandleDelete = async (id) => {
     if (window.confirm("Deseja realmente excluir este usuário ?")) {
-      const novaLinha = linha.filter((linha) => {
-        return linha.id !== id;
-      });
-      setLinha(novaLinha);
+      const clientDoc = doc(db, "clients", id)
+      await deleteDoc(clientDoc)
+      const novaLinha = linha
+      setLinha(novaLinha)
+      // const novaLinha = linha.filter((linha) => {
+      //   return linha.id !== id;
+      // });
+      // setLinha(novaLinha);
     }
   };
 
-  const HandleEditClick = (event, cliente) => {
-    setEditId(cliente.id);
 
+  const HandleEditClick = async (cliente) => {
+    
+    setEditId(cliente.id);
     const formValues = {
       nome: cliente.nome,
       idade: cliente.idade,
@@ -168,11 +171,12 @@ export default function Example() {
       cidade: cliente.cidade,
       estado: cliente.estado,
     };
-
+    
+    console.log(editId)
     setEditValues(formValues);
   };
 
-  const HandleEditSubmit = (event) => {
+  const HandleEditSubmit = async (event) => {
     const fieldName = event.target.getAttribute("id");
     const fieldValues = event.target.value;
 
@@ -182,7 +186,8 @@ export default function Example() {
     setEditValues(newFormData);
   };
 
-  const HandleEditFormSubmit = (event) => {
+  const HandleEditFormSubmit = async (event) => {
+
     const editedClient = {
       id: editId,
       nome: editValues.nome,
@@ -193,12 +198,22 @@ export default function Example() {
       estado: editValues.estado,
     };
 
+    
     const newClientList = [...linha];
     const index = linha.findIndex((linha) => linha.id === editedClient.id);
-
+    
     newClientList[index] = editedClient;
-
+    
+    
+    
+    console.log(newClientList)
     setLinha(newClientList);
+
+
+    const clientDoc = doc(db, "clients", editedClient.id)
+    await updateDoc(clientDoc, editedClient)
+
+
     setEditId(null);
   };
 
@@ -284,10 +299,7 @@ export default function Example() {
                 </tbody>
               </table>
               <div className="flex justify-center">
-                <a href="#a">
-                  <ImArrowRight className="text-indigo-500 text-2xl mb-2" />
-                </a>
-                {" "}
+                <Pagination defaultCurrent={1} total={50} />
               </div>
             </div>
           </div>
