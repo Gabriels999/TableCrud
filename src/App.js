@@ -1,21 +1,38 @@
+import React, { useState, useEffect } from "react";
+import { db } from "./firebase-config"
+import { collection, getDocs, addDoc } from "firebase/firestore"
 import "./App.css";
 import ReadOnlyRow from "./Components/ReadOnlyRow";
 import EditableRow from "./Components/EditableRow";
-import React, { useState } from "react";
-import data from "./mock-data.json";
 import { ImArrowRight } from "react-icons/im";
 
 export default function Example() {
+
+  const clientsCollectionRef = collection(db, "clients")
+
+  useEffect(()=>{
+
+    const getClients = async () =>{
+      const data = await getDocs(clientsCollectionRef)
+      console.log(data)
+      setLinha(data.docs.map((doc)=>({ ...doc.data(), id: doc.id })))
+      console.log(linha)
+    }
+    
+    getClients()
+  }, [])
+
+
   //--------------------------------------------InsertButton useStates------------------------------------
   const [count, setCount] = useState(3);
-  const [nome, setNome] = useState();
-  const [idade, setIdade] = useState();
-  const [civil, setCivil] = useState();
-  const [cpf, setCpf] = useState();
-  const [cidade, setCidade] = useState();
-  const [estado, setEstado] = useState();
+  const [nome, setNome] = useState('');
+  const [idade, setIdade] = useState('');
+  const [civil, setCivil] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [cidade, setCidade] = useState('');
+  const [estado, setEstado] = useState('');
 
-  const [linha, setLinha] = useState(data);
+  const [linha, setLinha] = useState([]);
 
   const [editId, setEditId] = useState(null);
   //------------------------------------------EditButton useStates---------------------------------------
@@ -38,7 +55,6 @@ export default function Example() {
               <div className="text-sm font-medium text-black-900">
                 <input
                   type="text"
-                  id="insertNome"
                   value={nome}
                   placeholder="Nome"
                   onChange={(e) => setNome(e.target.value)}
@@ -52,7 +68,6 @@ export default function Example() {
           <div className="text-sm text-black-900">
             <input
               type="text"
-              id="insertIdade"
               value={idade}
               placeholder="Idade"
               onChange={(e) => setIdade(e.target.value)}
@@ -63,7 +78,6 @@ export default function Example() {
         <td className="px-6 py-4 whitespace-nowrap text-sm text-black-500">
           <input
             type="text"
-            id="insertEstadoC"
             value={civil}
             placeholder="Estado Civil"
             onChange={(e) => setCivil(e.target.value)}
@@ -73,7 +87,6 @@ export default function Example() {
         <td className="px-6 py-4 whitespace-nowrap text-sm text-black-500">
           <input
             type="text"
-            id="insertCPF"
             value={cpf}
             placeholder="CPF"
             onChange={(e) => setCpf(e.target.value)}
@@ -83,7 +96,6 @@ export default function Example() {
         <td className="px-6 py-4 whitespace-nowrap text-sm text-black-500">
           <input
             type="text"
-            id="insertCidade"
             value={cidade}
             placeholder="Cidade"
             onChange={(e) => setCidade(e.target.value)}
@@ -93,7 +105,6 @@ export default function Example() {
         <td className="px-6 py-4 whitespace-nowrap text-sm text-black-500">
           <input
             type="text"
-            id="insertEstado"
             value={estado}
             placeholder="Estado"
             onChange={(e) => setEstado(e.target.value)}
@@ -113,7 +124,8 @@ export default function Example() {
     );
   }
 
-  function HandleInsert() {
+  const HandleInsert = async () => {
+    await addDoc(clientsCollectionRef, {nome: nome, idade: idade, civil: civil, cpf:cpf, cidade:cidade, estado:estado})
     setCount(count + 1);
     setLinha([
       ...linha,
@@ -127,12 +139,13 @@ export default function Example() {
         estado: estado,
       },
     ]);
-    setNome("");
-    setIdade("");
-    setCivil("");
-    setCpf("");
-    setCidade("");
-    setEstado("");
+    console.log(linha)
+    setNome("")
+    setIdade("")
+    setCivil("")
+    setCpf("")
+    setCidade("")
+    setEstado("")
   }
 
   const HandleDelete = (event, id) => {
