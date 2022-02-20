@@ -23,9 +23,8 @@ export default function Example() {
       const data = await getDocs(clientsCollectionRef);
       setLinha(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
     };
-
-    getClients();
-  });
+    getClients()
+  },[]);
 
   //--------------------------------------------InsertButton useStates---------------------------------------
   const [nome, setNome] = useState("");
@@ -57,7 +56,8 @@ export default function Example() {
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="flex items-center">
             <div className="ml-4">
-              <div className="text-sm font-medium text-black-900">
+              <div className="text-sm font-medium text-black-900">             
+                <form>
                 <input
                   type="text"
                   value={nome}
@@ -65,12 +65,14 @@ export default function Example() {
                   onChange={(e) => setNome(e.target.value)}
                   className="bg-gray-200 rounded text-center"
                 />
+                </form>
               </div>
             </div>
           </div>
         </td>
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="text-sm text-black-900">
+            <form>
             <input
               type="text"
               value={idade}
@@ -78,18 +80,22 @@ export default function Example() {
               onChange={(e) => setIdade(e.target.value)}
               className="bg-slate-200 w-16 rounded text-center"
             />
+            </form>
           </div>
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-black-500">
-          <input
+          <form>
+            <input
             type="text"
             value={civil}
             placeholder="Estado Civil"
             onChange={(e) => setCivil(e.target.value)}
             className="bg-gray-200 w-24 rounded text-center"
           />
+          </form>
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-black-500">
+          <form>
           <input
             type="text"
             value={cpf}
@@ -97,8 +103,10 @@ export default function Example() {
             onChange={(e) => setCpf(e.target.value)}
             className="bg-gray-200 w-2/3 rounded text-center"
           />
+          </form>
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-black-500">
+          <form>
           <input
             type="text"
             value={cidade}
@@ -106,8 +114,10 @@ export default function Example() {
             onChange={(e) => setCidade(e.target.value)}
             className="bg-gray-200 rounded text-center"
           />
+          </form>
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-black-500">
+          <form>
           <input
             type="text"
             value={estado}
@@ -115,6 +125,7 @@ export default function Example() {
             onChange={(e) => setEstado(e.target.value)}
             className="bg-gray-200 w-2/3 rounded text-center"
           />
+          </form>
         </td>
         <td>
           <button
@@ -139,17 +150,6 @@ export default function Example() {
       cidade: cidade,
       estado: estado,
     });
-    setLinha([
-      ...linha,
-      {
-        nome: nome,
-        idade: idade,
-        civil: civil,
-        cpf: cpf,
-        cidade: cidade,
-        estado: estado,
-      },
-    ]);
     setNome("");
     setIdade("");
     setCivil("");
