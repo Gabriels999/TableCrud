@@ -1,35 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { db } from "./firebase-config"
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore"
-import "./App.css";
+import { db } from "./firebase-config";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import ReadOnlyRow from "./Components/ReadOnlyRow";
 import EditableRow from "./Components/EditableRow";
-import { Pagination } from 'antd';
-import { ImArrowRight } from "react-icons/im";
+import ReactPaginate from "react-paginate";
 
 export default function Example() {
+  const clientsCollectionRef = collection(db, "clients");
 
-  const clientsCollectionRef = collection(db, "clients")
+  useEffect(() => {
+    const getClients = async () => {
+      const data = await getDocs(clientsCollectionRef);
+      setLinha(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    };
 
-  useEffect(()=>{
-
-    const getClients = async () =>{
-      const data = await getDocs(clientsCollectionRef)
-      setLinha(data.docs.map((doc)=>({ ...doc.data(), id: doc.id })))
-    }
-    
-    getClients()
-  }, [])
-
+    getClients();
+  }, []);
 
   //--------------------------------------------InsertButton useStates------------------------------------
-  const [count, setCount] = useState(3);
-  const [nome, setNome] = useState('');
-  const [idade, setIdade] = useState('');
-  const [civil, setCivil] = useState('');
-  const [cpf, setCpf] = useState('');
-  const [cidade, setCidade] = useState('');
-  const [estado, setEstado] = useState('');
+  const [nome, setNome] = useState("");
+  const [idade, setIdade] = useState("");
+  const [civil, setCivil] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [estado, setEstado] = useState("");
 
   const [linha, setLinha] = useState([]);
 
@@ -44,6 +45,10 @@ export default function Example() {
     estado: "",
   });
   //-------------------------------------------------------------------------------------------------------
+  const [pageNumber, setPageNumber] = useState(0);
+
+  const clientsPerPage = 6;
+  const pagesVisited = pageNumber * clientsPerPage;
 
   function InputFields() {
     return (
@@ -124,8 +129,14 @@ export default function Example() {
   }
 
   const HandleInsert = async () => {
-    await addDoc(clientsCollectionRef, {nome: nome, idade: idade, civil: civil, cpf:cpf, cidade:cidade, estado:estado})
-    setCount(count + 1);
+    await addDoc(clientsCollectionRef, {
+      nome: nome,
+      idade: idade,
+      civil: civil,
+      cpf: cpf,
+      cidade: cidade,
+      estado: estado,
+    });
     setLinha([
       ...linha,
       {
@@ -137,21 +148,20 @@ export default function Example() {
         estado: estado,
       },
     ]);
-    console.log(linha)
-    setNome("")
-    setIdade("")
-    setCivil("")
-    setCpf("")
-    setCidade("")
-    setEstado("")
-  }
+    setNome("");
+    setIdade("");
+    setCivil("");
+    setCpf("");
+    setCidade("");
+    setEstado("");
+  };
 
   const HandleDelete = async (id) => {
     if (window.confirm("Deseja realmente excluir este usuário ?")) {
-      const clientDoc = doc(db, "clients", id)
-      await deleteDoc(clientDoc)
-      const novaLinha = linha
-      setLinha(novaLinha)
+      const clientDoc = doc(db, "clients", id);
+      await deleteDoc(clientDoc);
+      // const novaLinha = linha
+      // setLinha(novaLinha)
       // const novaLinha = linha.filter((linha) => {
       //   return linha.id !== id;
       // });
@@ -159,9 +169,7 @@ export default function Example() {
     }
   };
 
-
   const HandleEditClick = async (cliente) => {
-    
     setEditId(cliente.id);
     const formValues = {
       nome: cliente.nome,
@@ -171,8 +179,8 @@ export default function Example() {
       cidade: cliente.cidade,
       estado: cliente.estado,
     };
-    
-    console.log(editId)
+
+    console.log(editId);
     setEditValues(formValues);
   };
 
@@ -187,7 +195,6 @@ export default function Example() {
   };
 
   const HandleEditFormSubmit = async (event) => {
-
     const editedClient = {
       id: editId,
       nome: editValues.nome,
@@ -198,21 +205,16 @@ export default function Example() {
       estado: editValues.estado,
     };
 
-    
     const newClientList = [...linha];
     const index = linha.findIndex((linha) => linha.id === editedClient.id);
-    
+
     newClientList[index] = editedClient;
-    
-    
-    
-    console.log(newClientList)
+
+    console.log(newClientList);
     setLinha(newClientList);
 
-
-    const clientDoc = doc(db, "clients", editedClient.id)
-    await updateDoc(clientDoc, editedClient)
-
+    const clientDoc = doc(db, "clients", editedClient.id);
+    await updateDoc(clientDoc, editedClient);
 
     setEditId(null);
   };
@@ -221,13 +223,41 @@ export default function Example() {
     setEditId(null);
   };
 
+  const displayClients = linha
+    .slice(pagesVisited, pagesVisited + clientsPerPage)
+    .map((clients) => {
+      return (
+        <>
+          {editId === clients.id ? (
+            <EditableRow
+              editValues={editValues}
+              HandleEditSubmit={HandleEditSubmit}
+              HandleEditFormSubmit={HandleEditFormSubmit}
+              HandleEditCancel={HandleEditCancel}
+            />
+          ) : (
+            <ReadOnlyRow
+              props={clients}
+              HandleEditClick={HandleEditClick}
+              HandleDelete={HandleDelete}
+            />
+          )}
+        </>
+      );
+    });
+
+  const pageCount = Math.ceil(linha.length / clientsPerPage);
+  const changePage = ({ selected }) => {
+    setPageNumber(selected);
+  };
+
   return (
     <div className="container mx-auto mt-12 text-blac-600">
       <h1 className="text-4xl">Tabela de Clientes</h1>
       <br></br>
       <div className="flex flex-col">
         <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+          <div className="align-middle inline-block min-w-full sm:px-6 lg:px-8">
             <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -277,34 +307,25 @@ export default function Example() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {linha.map((cliente) => (
-                    <>
-                      {editId === cliente.id ? (
-                        <EditableRow
-                          editValues={editValues}
-                          HandleEditSubmit={HandleEditSubmit}
-                          HandleEditFormSubmit={HandleEditFormSubmit}
-                          HandleEditCancel={HandleEditCancel}
-                        />
-                      ) : (
-                        <ReadOnlyRow
-                          props={cliente}
-                          HandleEditClick={HandleEditClick}
-                          HandleDelete={HandleDelete}
-                        />
-                      )}
-                    </>
-                  ))}
+                  {displayClients}
                   {InputFields()}
                 </tbody>
               </table>
               <div className="flex justify-center">
-                <Pagination defaultCurrent={1} total={50} />
+                <ReactPaginate
+                  className="flex gap-4"
+                  pageCount={pageCount}
+                  onPageChange={changePage}
+                  containerClassName={"paginationButtons"}
+                  previousLinkClassName={"previousButton"}
+                  nextLinkClassName={'nextButton'}
+                  disabledClassName={'paginationDisabled'}
+                  activeClassName={'paginationActive'}
+                />
               </div>
             </div>
           </div>
         </div>
-        <h1>ID atual: {count}</h1>
       </div>
     </div>
   );
