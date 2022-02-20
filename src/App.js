@@ -25,7 +25,7 @@ export default function Example() {
     };
 
     getClients();
-  }, []);
+  });
 
   //--------------------------------------------InsertButton useStates---------------------------------------
   const [nome, setNome] = useState("");
