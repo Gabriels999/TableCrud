@@ -11,8 +11,11 @@ import {
 import ReadOnlyRow from "./Components/ReadOnlyRow";
 import EditableRow from "./Components/EditableRow";
 import ReactPaginate from "react-paginate";
+import "./App.css"
 
 export default function Example() {
+  //--------------------------------------------Get Clients from DB--------------------------------------------
+
   const clientsCollectionRef = collection(db, "clients");
 
   useEffect(() => {
@@ -24,7 +27,7 @@ export default function Example() {
     getClients();
   }, []);
 
-  //--------------------------------------------InsertButton useStates------------------------------------
+  //--------------------------------------------InsertButton useStates---------------------------------------
   const [nome, setNome] = useState("");
   const [idade, setIdade] = useState("");
   const [civil, setCivil] = useState("");
@@ -35,7 +38,8 @@ export default function Example() {
   const [linha, setLinha] = useState([]);
 
   const [editId, setEditId] = useState(null);
-  //------------------------------------------EditButton useStates---------------------------------------
+
+  //------------------------------------------EditButton useStates-------------------------------------------
   const [editValues, setEditValues] = useState({
     nome: "",
     idade: "",
@@ -44,11 +48,8 @@ export default function Example() {
     cidade: "",
     estado: "",
   });
-  //-------------------------------------------------------------------------------------------------------
-  const [pageNumber, setPageNumber] = useState(0);
 
-  const clientsPerPage = 6;
-  const pagesVisited = pageNumber * clientsPerPage;
+  //------------------------------------------Render Input Fields--------------------------------------------
 
   function InputFields() {
     return (
@@ -117,7 +118,7 @@ export default function Example() {
         </td>
         <td>
           <button
-            class="bg-indigo-500 transition duration-200 hover:scale-110 ease-in-out rounded-lg w-24 h-10 self-end mt-2 shadow-xl font-semibold ml-2"
+            class="bg-indigo-500 transition duration-200 hover:scale-110 ease-in-out rounded-lg w-24 h-10 self-end mt-2 shadow-xl font-semibold ml-2 mb-1"
             type="submit"
             onClick={HandleInsert}
           >
@@ -128,6 +129,7 @@ export default function Example() {
     );
   }
 
+  // -------------------------------------------Handle Insert--------------------------------------------------
   const HandleInsert = async () => {
     await addDoc(clientsCollectionRef, {
       nome: nome,
@@ -154,21 +156,29 @@ export default function Example() {
     setCpf("");
     setCidade("");
     setEstado("");
+    const getClients = async () => {
+      const data = await getDocs(clientsCollectionRef);
+      setLinha(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    };
+
+    getClients();
   };
 
+  //--------------------------------------------Handle Delete--------------------------------------------------
   const HandleDelete = async (id) => {
     if (window.confirm("Deseja realmente excluir este usuário ?")) {
       const clientDoc = doc(db, "clients", id);
       await deleteDoc(clientDoc);
-      // const novaLinha = linha
-      // setLinha(novaLinha)
-      // const novaLinha = linha.filter((linha) => {
-      //   return linha.id !== id;
-      // });
-      // setLinha(novaLinha);
+      const getClients = async () => {
+        const data = await getDocs(clientsCollectionRef);
+        setLinha(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      };
+
+      getClients();
     }
   };
 
+  //--------------------------------------------Handle Edit----------------------------------------------------
   const HandleEditClick = async (cliente) => {
     setEditId(cliente.id);
     const formValues = {
@@ -180,7 +190,6 @@ export default function Example() {
       estado: cliente.estado,
     };
 
-    console.log(editId);
     setEditValues(formValues);
   };
 
@@ -205,23 +214,26 @@ export default function Example() {
       estado: editValues.estado,
     };
 
-    const newClientList = [...linha];
-    const index = linha.findIndex((linha) => linha.id === editedClient.id);
-
-    newClientList[index] = editedClient;
-
-    console.log(newClientList);
-    setLinha(newClientList);
-
     const clientDoc = doc(db, "clients", editedClient.id);
     await updateDoc(clientDoc, editedClient);
+    const getClients = async () => {
+      const data = await getDocs(clientsCollectionRef);
+      setLinha(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+    };
 
+    getClients();
     setEditId(null);
   };
 
   const HandleEditCancel = (event) => {
     setEditId(null);
   };
+
+  //---------------------------------------------Pagination----------------------------------------------------
+  const [pageNumber, setPageNumber] = useState(0);
+
+  const clientsPerPage = 6;
+  const pagesVisited = pageNumber * clientsPerPage;
 
   const displayClients = linha
     .slice(pagesVisited, pagesVisited + clientsPerPage)
@@ -250,6 +262,8 @@ export default function Example() {
   const changePage = ({ selected }) => {
     setPageNumber(selected);
   };
+
+  //--------------------------------------------Renders it all-------------------------------------------
 
   return (
     <div className="container mx-auto mt-12 text-blac-600">
@@ -311,16 +325,16 @@ export default function Example() {
                   {InputFields()}
                 </tbody>
               </table>
-              <div className="flex justify-center">
+              <div className="flex justify-center text-gray-500 bg-gray-100">
                 <ReactPaginate
-                  className="flex gap-4"
+                  className="flex gap-4 font-size text-base"
                   pageCount={pageCount}
                   onPageChange={changePage}
                   containerClassName={"paginationButtons"}
                   previousLinkClassName={"previousButton"}
-                  nextLinkClassName={'nextButton'}
-                  disabledClassName={'paginationDisabled'}
-                  activeClassName={'paginationActive'}
+                  nextLinkClassName={"nextButton"}
+                  disabledClassName={"paginationDisabled"}
+                  activeClassName={"paginationActive"}
                 />
               </div>
             </div>

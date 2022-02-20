@@ -31,7 +31,7 @@ const ReadOnlyRow = ({ props, HandleEditClick, HandleDelete }) => {
       </td>
       <td className="ps-6 pe-2 py-4 whitespace-nowrap text-sm text-black-500 flex gap-x-2">
         <button
-          className="bg-indigo-500 w-8 h-8 rounded-lg transition duration-200 hover:scale-110 ease-in-out flex justify-center items-center shadow-xl"
+          className="bg-yellow-400 w-8 h-8 rounded-lg transition duration-200 hover:scale-110 ease-in-out flex justify-center items-center shadow-xl"
           onClick={(event) => HandleEditClick(props)}
         >
           <BsPencil />
