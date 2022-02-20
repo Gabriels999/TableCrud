@@ -24,6 +24,7 @@ export default function Example() {
       setLinha(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
     };
     getClients()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
 
   //--------------------------------------------InsertButton useStates---------------------------------------
