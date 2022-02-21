@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "@firebase/firestore"
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDLhPj1KvK3bEFtDKzpqSOqs9gaUTCHlGk",
-  authDomain: "tables-3a431.firebaseapp.com",
-  projectId: "tables-3a431",
-  storageBucket: "tables-3a431.appspot.com",
-  messagingSenderId: "438353592617",
-  appId: "1:438353592617:web:619fa14f2bc1af35343738"
+  apiKey: "AIzaSyAfOyVkixMuyXGuNvsNW-0vCfKoaoKAlDU",
+  authDomain: "tablecrud999.firebaseapp.com",
+  projectId: "tablecrud999",
+  storageBucket: "tablecrud999.appspot.com",
+  messagingSenderId: "888290762563",
+  appId: "1:888290762563:web:0f9a0c545fc1a0a3c119f6"
 };
 
 const app = initializeApp(firebaseConfig);
