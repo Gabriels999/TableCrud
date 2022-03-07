@@ -1,6 +1,6 @@
 # TableCrud
 
-## This is a react table crud app developed by me, Gabriel Santos.
+## This is a react table crud app
 
 This project is a CRUD table with a front-end made on react, hosted on firebase and deployed on vercel.
 Here's the link to the project deployed: https://table-crud-h6pluqrz3-gabriels999.vercel.app/
